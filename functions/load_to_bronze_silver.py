@@ -28,7 +28,7 @@ def load_to_bronze(table, **context):
     
     with psycopg2.connect(dbname='dshop_bu', user=pg_conn.login, password=pg_conn.password, host=pg_conn.host) as pg_connection:
         cursor = pg_connection.cursor()
-        with client.write(os.path.join('new_datalake', 'bronze','dshop',for_date, table)) as csv_file:
+        with client.write(os.path.join('new_datalake', 'bronze','dshop',for_date, table)+".csv", overwrite=True) as csv_file:
             cursor.copy_expert(f"COPY {table} TO STDOUT WITH HEADER CSV", csv_file)
     logging.info("Successfully loaded")
 
