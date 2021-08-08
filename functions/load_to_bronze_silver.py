@@ -16,13 +16,7 @@ def load_to_bronze(table, **context):
     for_date = execution_date.strftime("%d_%m_%Y")
     hdfs_conn = BaseHook.get_connection('datalake_hdfs')
     pg_conn = BaseHook.get_connection('oltp_postgres')
-    pg_creds = {
-        'host': pg_conn.host,
-        'user': pg_conn.login,
-        'password': pg_conn.password,
-        'database': 'dshop_bu'
-    }
-
+   
     logging.info(f"Writing table {table} for date {for_date} from {pg_conn.host} to Bronze")
     client = InsecureClient("http://"+hdfs_conn.host, user=hdfs_conn.login)
     
