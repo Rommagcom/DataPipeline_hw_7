@@ -57,7 +57,7 @@ def load_to_bronze_from_api(load_for_date, **context):
         
         if response.status_code==404:
             if 'message' in response.json():
-                logging.info(response.json['message'])
+                logging.info(response.json()['message'])
 
         response.raise_for_status()
         
