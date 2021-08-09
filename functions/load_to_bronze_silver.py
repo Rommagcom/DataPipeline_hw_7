@@ -37,10 +37,10 @@ def load_to_bronze_from_api(load_for_date, **context):
     client = InsecureClient("http://"+hdfs_conn.host, user=hdfs_conn.login)
     
     my_headers = {'Content-Type' : 'application/json'}
-    params={"username": "rd_dreams", "password": "djT6LasE"}
+    params=api_conn_auth.extra
     json_data = json.dumps(params)
 
-    response = requests.post('https://robot-dreams-de-api.herokuapp.com/auth', data=json_data,headers=my_headers)
+    response = requests.post(api_conn_auth.host, data=json_data,headers=my_headers)
     response.raise_for_status()
     
     resp_auth = response.json()
