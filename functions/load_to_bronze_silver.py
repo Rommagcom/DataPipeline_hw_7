@@ -33,14 +33,12 @@ def load_to_bronze_from_api(load_for_date, **context):
     api_conn_auth = BaseHook.get_connection('https_outofstock')
     api_conn_get_data = BaseHook.get_connection('https_outofstock_get')
    
-    logging.info(f"Getting OAuth token from API {api_conn_auth.host}")
+    logging.info(f"Getting OAuth token from API {api_conn_auth.host} with cred {api_conn_auth.extra}")
     client = InsecureClient("http://"+hdfs_conn.host, user=hdfs_conn.login)
     
     my_headers = {'Content-Type' : 'application/json'}
-    params=api_conn_auth.extra
-    json_data = json.dumps(params)
-
-    response = requests.post(api_conn_auth.host, data=json_data,headers=my_headers)
+    
+    response = requests.post(api_conn_auth.host, data=api_conn_auth.extra,headers=my_headers)
     response.raise_for_status()
     
     resp_auth = response.json()
