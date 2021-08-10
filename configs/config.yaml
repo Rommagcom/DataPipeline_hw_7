@@ -6,6 +6,7 @@ daily_etl:
       - aisles
       - clients
       - departments
+      - location_areas
       - orders
       - products
       - store_types

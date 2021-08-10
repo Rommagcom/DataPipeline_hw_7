@@ -1,3 +1,4 @@
+from pyspark.sql import SparkSession
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.dummy_operator import DummyOperator
@@ -7,11 +8,16 @@ import yaml
 
 from functions.load_to_bronze_silver import load_to_bronze
 
+
 default_args = {
     "owner": "airflow",
     "email_on_failure": False
 }
 
+spark = SparkSession.builder\
+    .master('local')\
+    .appName('transform_stage')\
+    .getOrCreate()
 
 
 def return_tables():

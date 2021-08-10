@@ -65,26 +65,14 @@ def load_to_bronze_from_api(load_for_date, **context):
     
     logging.info("Uploading task finished")
 
-def load_to_silver_spark(table,**context):
+def load_to_silver_spark(df,df_name,**context):
 
     execution_date = context['execution_date']
-    for_date = execution_date.strftime("%d_%m_%Y")
-    pg_conn = BaseHook.get_connection('oltp_postgres')
+    for_date = execution_date.strftime("%Y-%m-%d")
 
-    pg_url = f"jdbc:postgresql://{pg_conn.host}:{pg_conn.port}/dshop_bu"
-    pg_properties = {"user": pg_conn.login, "password": pg_conn.password}
-
-    spark = SparkSession.builder \
-        .config('spark.driver.extraClassPath'
-                , '/home/user/shared_folder/postgresql-42.2.23.jar') \
-        .master('local') \
-        .appName('upload_outofstock_api') \
-        .getOrCreate()
-
-    logging.info(f"Writing table {table} for date {for_date} from {pg_conn.host} to Silver")
-    table_df = spark.read.jdbc(pg_url, table=table, properties=pg_properties)
-    table_df.write.parquet(
-        os.path.join('new_datalake', 'silver',table, for_date),
+    logging.info(f"Writing table {df_name} for date {for_date} from Bronze to Silver")
+    df.write.parquet(
+        os.path.join('new_datalake','silver','dshop',df_name),
         mode="overwrite")
 
-    logging.info("Successfully loaded")
+    logging.info("Successfully loaded to Silver")
