@@ -2,6 +2,8 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.dummy_operator import DummyOperator
 from datetime import datetime
+import os
+import yaml
 
 from functions.load_to_bronze_silver import load_to_bronze
 
@@ -13,17 +15,13 @@ default_args = {
 
 
 def return_tables():
-    return [
-        {"table":"aisles","output":"ailses.csv"},
-        {"table":"clients","output":"clients.csv"},
-        {"table":"departments","output":"departments.csv"},
-        {"table":"orders","output":"orders.csv"},
-        {"table":"products","output":"products.csv"},
-        {"table":"store_types","output":"store_types.csv"},
-        {"table":"stores","output":"stores.csv"}]
+    this_folder = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(this_folder,'configs','config.yaml'),'r') as yaml_file:
+        config = yaml.safe_load(yaml_file)
+        return config.get('daily_etl').get('sources').get('postgresql')
         
         
-def load_to_bronze_group(value, for_date):
+def load_to_bronze_group(value):
     return PythonOperator(
         task_id="load_"+value+"_to_bronze",
         python_callable=load_to_bronze,
@@ -48,4 +46,4 @@ dummy2 = DummyOperator(
 )
 
 for table in return_tables():
-    dummy1 >> load_to_bronze_group(table['table'], datetime.now()) >> dummy2
+    dummy1 >> load_to_bronze_group(table) >> dummy2

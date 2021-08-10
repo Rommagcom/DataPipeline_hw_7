@@ -1,0 +1,12 @@
+daily_etl:
+  sources:
+    api:
+      - "etldbprocess"
+    postgresql:
+      - aisles
+      - clients
+      - departments
+      - orders
+      - products
+      - store_types
+      - stores
