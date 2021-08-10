@@ -22,7 +22,7 @@ def load_to_bronze(table, **context):
     
     with psycopg2.connect(dbname='dshop_bu', user=pg_conn.login, password=pg_conn.password, host=pg_conn.host) as pg_connection:
         cursor = pg_connection.cursor()
-        with client.write(os.path.join('new_datalake', 'bronze','dshop',for_date, table)+".csv", overwrite=True) as csv_file:
+        with client.write(os.path.join('new_datalake', 'bronze','dshop',table,for_date, table)+".csv", overwrite=True) as csv_file:
             cursor.copy_expert(f"COPY {table} TO STDOUT WITH HEADER CSV", csv_file)
     logging.info("Successfully loaded")
 
@@ -84,7 +84,7 @@ def load_to_silver_spark(table,**context):
     logging.info(f"Writing table {table} for date {for_date} from {pg_conn.host} to Silver")
     table_df = spark.read.jdbc(pg_url, table=table, properties=pg_properties)
     table_df.write.parquet(
-        os.path.join('new_datalake', 'silver',for_date, table),
+        os.path.join('new_datalake', 'silver',table, for_date),
         mode="overwrite")
 
     logging.info("Successfully loaded")
