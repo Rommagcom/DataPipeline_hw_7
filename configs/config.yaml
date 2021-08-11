@@ -11,3 +11,13 @@ daily_etl:
       - products
       - store_types
       - stores
+    loadtosilver:
+      - aisles
+      - clients
+      - departments
+      - location_areas
+      - orders
+      - products
+      - store_types
+      - stores
+      - out_of_stock_api     

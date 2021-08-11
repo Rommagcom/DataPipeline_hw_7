@@ -47,7 +47,7 @@ def load_to_bronze_from_api(load_for_date, **context):
     if response.status_code == 200:
         logging.info(f"Successfully authorized to API")
         logging.info(f"Getting data from out of stock API for date {load_for_date}")
-        dir_to_save = os.path.join('new_datalake', 'bronze','out_of_stock_api',load_for_date)
+        dir_to_save = os.path.join('new_datalake', 'bronze','dshop','out_of_stock_api',load_for_date)
         #client.makedirs(dir_to_save) # Directory creation
         my_headers = {'Authorization' :'JWT ' + resp_auth['access_token']}
         params= {'date': load_for_date }
@@ -64,15 +64,49 @@ def load_to_bronze_from_api(load_for_date, **context):
             client.write(os.path.join(dir_to_save, str(product_id['product_id'])+'.json'), data=json.dumps(product_id), encoding='utf-8',overwrite=True)
     
     logging.info("Uploading task finished")
+   
+     
 
-def load_to_silver_spark(df,df_name,**context):
+def load_to_silver_tables_spark(table,**context):
+
+    spark = SparkSession.builder\
+        .master('local')\
+        .appName('transform_stage')\
+        .getOrCreate()
 
     execution_date = context['execution_date']
     for_date = execution_date.strftime("%Y-%m-%d")
 
-    logging.info(f"Writing table {df_name} for date {for_date} from Bronze to Silver")
-    df.write.parquet(
-        os.path.join('new_datalake','silver','dshop',df_name),
-        mode="overwrite")
+    logging.info(f"Loading table {table} from Bronze to process")
+
+    hdfs_url = 'webhdfs://127.0.0.1:50070'
+    if table=='out_of_stock_api':
+        tableDf = spark.read.load(os.path.join('new_datalake','bronze','dshop','out_of_stock_api',for_date)
+            ,header = "true"
+            ,inferSchema = "true"
+            , format = "json")
+    else:
+        tableDf = spark.read.load(os.path.join('new_datalake','bronze','dshop',table,for_date)
+            ,header = "true"
+            ,inferSchema = "true"
+            ,format = "csv")
+
+    logging.info(f"Cleaning up table {table}")
+    
+    tableDf = tableDf.dropDuplicates().na.drop("all")
+    
+    if "department" in tableDf.schema.fieldNames():
+        tableDf = tableDf.na.drop(subset=["department"])
+    if "area" in tableDf.schema.fieldNames():
+         tableDf = tableDf.na.drop(subset=["area",])
+    if "product_name" in tableDf.schema.fieldNames():
+         tableDf = tableDf.na.drop(subset=["product_name"])
+    if "aisle_id" in tableDf.schema.fieldNames():
+         tableDf = tableDf.na.drop(subset=["aisle_id"])
+
+    logging.info(f"Writing data {table} for date {for_date} from Bronze to Silver")
+
+    tableDf.write\
+        .parquet(os.path.join('new_datalake','silver','dshop',table), mode='overwrite')
 
     logging.info("Successfully loaded to Silver")
