@@ -26,8 +26,8 @@ def load_to_bronze_group(for_date):
 dag = DAG(
     dag_id="load_to_bronze_from_api",
     description="Load data from out of stock API to Data Lake bronze",
-    schedule_interval="@daily",
-    start_date=datetime(2021, 8, 8)
+    schedule_interval="0 0 * * *",
+    start_date=datetime(2021, 8, 11)
 )
 
 dummy1 = DummyOperator(

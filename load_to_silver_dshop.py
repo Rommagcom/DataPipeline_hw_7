@@ -38,8 +38,8 @@ def load_to_silver_group(value):
 dag = DAG(
     dag_id="load_to_silver_dshop",
     description="Load data from Bronze dshop to Data Lake silver",
-    schedule_interval="@daily",
-    start_date=datetime(2021, 8, 8)
+    schedule_interval="0 5 * * *",
+    start_date=datetime(2021, 8, 11)
 )
 
 dummy1 = DummyOperator(

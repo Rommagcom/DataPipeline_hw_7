@@ -1,4 +1,3 @@
-from pyspark.sql import SparkSession
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.dummy_operator import DummyOperator
@@ -8,16 +7,11 @@ import yaml
 
 from functions.load_to_bronze_silver import load_to_bronze
 
-
 default_args = {
     "owner": "airflow",
     "email_on_failure": False
 }
 
-spark = SparkSession.builder\
-    .master('local')\
-    .appName('transform_stage')\
-    .getOrCreate()
 
 
 def return_tables():
@@ -38,8 +32,8 @@ def load_to_bronze_group(value):
 dag = DAG(
     dag_id="load_to_bronze_from_db",
     description="Load data from PostgreSQL dshop database to Data Lake bronze",
-    schedule_interval="@daily",
-    start_date=datetime(2021, 8, 8)
+    schedule_interval="0 0 * * *",
+    start_date=datetime(2021, 8, 11)
 )
 
 dummy1 = DummyOperator(
